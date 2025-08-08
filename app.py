@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # App configuration
-st.set_page_config(page_title="cleaned_startup.csv", layout="wide")
+st.set_page_config(page_title="Startup fFunding Dashboard", layout="wide")
 st.title("🚀 Startup Funding Analysis")
 
 # Load dataset
-df = pd.read_csv("startup.csv")
+df = pd.read_csv("startup_cleaned.csv")
 
 # Data Cleaning
 df["Amount in USD"] = pd.to_numeric(df["Amount in USD"], errors="coerce")
@@ -116,5 +116,6 @@ with col6:
         st.pyplot(fig6)
     else:
         st.info("No data available for selected filters.")
+
 
 
