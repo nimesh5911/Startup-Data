@@ -6,92 +6,88 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Page Config
-st.set_page_config(page_title="📊 Indian Startup Funding Dashboard", layout="wide")
-st.title("📊 Indian Startup Funding Dashboard")
+st.set_page_config(page_title="Startup Funding Dashboard", layout="wide")
+
+# Title
+st.title("🚀 Startup Funding Analytics Dashboard")
 
 # Load Data
-df = pd.read_csv("cleaned_startup_funding.csv")
-
-# Convert Date column to datetime
-df["Date"] = pd.to_datetime(df["Date"], errors='coerce')
+df = pd.read_csv("startup_funding_cleaned.csv")
 
 # Sidebar Filters
 st.sidebar.header("Filter Options")
 
-# Gender-like filter = Industry
+# Industry filter with "All" option
 industry_options = ["All"] + sorted(df["Industry Vertical"].dropna().unique().tolist())
 selected_industry = st.sidebar.selectbox("Select Industry Vertical", industry_options)
 
-# Passenger class-like filter = City
+# Investment type filter
+investment_options = ["All"] + sorted(df["Investment Type"].dropna().unique().tolist())
+selected_investment = st.sidebar.selectbox("Select Investment Type", investment_options)
+
+# City filter
 city_options = ["All"] + sorted(df["City"].dropna().unique().tolist())
 selected_city = st.sidebar.selectbox("Select City", city_options)
 
-# New useful filter = Year
-year_options = ["All"] + sorted(df["Date"].dropna().dt.year.unique().tolist())
-selected_year = st.sidebar.selectbox("Select Year", year_options)
-
-# Apply Filters
+# Apply filters
 filtered_df = df.copy()
-
 if selected_industry != "All":
     filtered_df = filtered_df[filtered_df["Industry Vertical"] == selected_industry]
-
+if selected_investment != "All":
+    filtered_df = filtered_df[filtered_df["Investment Type"] == selected_investment]
 if selected_city != "All":
     filtered_df = filtered_df[filtered_df["City"] == selected_city]
 
-if selected_year != "All":
-    filtered_df = filtered_df[filtered_df["Date"].dt.year == selected_year]
-
-# Show Data Preview
-st.subheader("Filtered Data Preview")
-st.dataframe(filtered_df.head(20))
-
-# Option to show all raw data
-if st.checkbox("Show Full Raw Data"):
+# Show Raw Data
+if st.checkbox("Show Raw Data"):
     st.dataframe(df)
 
-# Plot 1: Top 10 Industries by Funding
-st.subheader("Top 10 Industries by Total Funding")
-top_industries = (
+# Filtered Data Preview
+st.subheader("Filtered Data Preview")
+st.write(filtered_df.head())
+
+# --- Visualizations ---
+# 1. Funding by Industry
+st.subheader("Funding Amount by Industry Vertical")
+fig1, ax1 = plt.subplots()
+industry_funding = (
     filtered_df.groupby("Industry Vertical")["Amount in USD"]
     .sum()
     .sort_values(ascending=False)
     .head(10)
 )
-fig1, ax1 = plt.subplots()
-sns.barplot(x=top_industries.values, y=top_industries.index, ax=ax1)
+sns.barplot(x=industry_funding.values, y=industry_funding.index, ax=ax1)
 ax1.set_xlabel("Total Funding (USD)")
 ax1.set_ylabel("Industry Vertical")
 st.pyplot(fig1)
 
-# Plot 2: Funding by City
-st.subheader("Top Cities by Funding Amount")
-top_cities = (
-    filtered_df.groupby("City")["Amount in USD"]
+# 2. Funding by Investment Type
+st.subheader("Funding Amount by Investment Type")
+fig2, ax2 = plt.subplots()
+investment_funding = (
+    filtered_df.groupby("Investment Type")["Amount in USD"]
     .sum()
     .sort_values(ascending=False)
-    .head(10)
 )
-fig2, ax2 = plt.subplots()
-sns.barplot(x=top_cities.values, y=top_cities.index, ax=ax2)
+sns.barplot(x=investment_funding.values, y=investment_funding.index, ax=ax2)
 ax2.set_xlabel("Total Funding (USD)")
-ax2.set_ylabel("City")
+ax2.set_ylabel("Investment Type")
 st.pyplot(fig2)
 
-# Plot 3: Monthly Funding Trend
+# 3. Monthly Funding Trend
 st.subheader("Monthly Funding Trend")
-if not filtered_df.empty:
-    monthly_trend = (
-        filtered_df.groupby(filtered_df["Date"].dt.to_period("M"))["Amount in USD"]
-        .sum()
-        .sort_index()
-    )
-    monthly_trend.index = monthly_trend.index.to_timestamp()  # Convert Period to Timestamp
-    fig3, ax3 = plt.subplots()
-    ax3.plot(monthly_trend.index, monthly_trend.values, marker="o")
-    ax3.set_xlabel("Month")
-    ax3.set_ylabel("Funding Amount (USD)")
-    ax3.tick_params(axis='x', rotation=45)
-    st.pyplot(fig3)
-else:
-    st.warning("No data available for the selected filters.")
+fig3, ax3 = plt.subplots()
+monthly_trend = (
+    filtered_df.groupby("Month")["Amount in USD"]
+    .sum()
+    .reindex(range(1, 13), fill_value=0)  # Ensure months are in order
+)
+sns.lineplot(x=monthly_trend.index, y=monthly_trend.values, marker="o", ax=ax3)
+ax3.set_xlabel("Month")
+ax3.set_ylabel("Total Funding (USD)")
+ax3.set_xticks(range(1, 13))
+ax3.set_xticklabels(
+    ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+)
+st.pyplot(fig3)
