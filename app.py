@@ -10,7 +10,7 @@ st.set_page_config(page_title="Startup Funding Dashboard", layout="wide")
 st.title("🚀 Indian Startup Funding Analysis")
 
 # Load dataset
-df = pd.read_csv("your_dataset.csv")  # Replace with your CSV file name
+df = pd.read_csv("startup_cleaned.csv")  # Replace with your CSV file name
 
 # Data Cleaning
 df["Amount in USD"] = pd.to_numeric(df["Amount in USD"], errors="coerce")
@@ -73,3 +73,4 @@ fig3, ax3 = plt.subplots()
 sns.lineplot(data=monthly_trend, x="Date", y="Amount in USD", marker="o", ax=ax3)
 plt.xticks(rotation=45)
 st.pyplot(fig3)
+
