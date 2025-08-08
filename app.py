@@ -5,56 +5,74 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# App configuration
+# -----------------------------
+# Page Config
+# -----------------------------
 st.set_page_config(page_title="Startup Funding Dashboard", layout="wide")
 st.title("🚀 Indian Startup Funding Analysis")
 
-# Load dataset
+# -----------------------------
+# Load & Clean Data
+# -----------------------------
 df = pd.read_csv("startup_cleaned.csv")  # Your cleaned CSV
 
-# Data Cleaning
 df["Amount in USD"] = pd.to_numeric(df["Amount in USD"], errors="coerce")
 df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df = df.dropna(subset=["Amount in USD", "City Location", "Startup Name"])
 
-# Sidebar Filters (Improved)
+# -----------------------------
+# Sidebar Filters
+# -----------------------------
 st.sidebar.header("Filter Options")
 
-# Multi-select for cities
+# Show Raw Data (Unfiltered)
+if st.sidebar.checkbox("Show Raw Data (Unfiltered)"):
+    st.subheader("📄 Raw Data (Unfiltered)")
+    st.dataframe(df)
+
+# Multi-select for Cities
 all_cities = sorted(df["City Location"].dropna().unique())
 selected_cities = st.sidebar.multiselect("Select Cities", options=all_cities, default=all_cities)
 
-# Year range slider
+# Year Range Slider
 min_year, max_year = int(df["Date"].dt.year.min()), int(df["Date"].dt.year.max())
 selected_years = st.sidebar.slider("Select Year Range", min_year, max_year, (min_year, max_year))
 
-# Multi-select for industries
+# Multi-select for Industries
 all_industries = sorted(df["Industry Vertical"].dropna().unique())
 selected_industries = st.sidebar.multiselect("Select Industries", options=all_industries, default=all_industries)
 
-# Funding amount slider
-amount_range = st.sidebar.slider("Select Funding Amount Range (USD)", 
-                                  int(df["Amount in USD"].min()), 
-                                  int(df["Amount in USD"].max()), 
-                                  (int(df["Amount in USD"].min()), int(df["Amount in USD"].max())))
+# Multi-select for Investment Types (if available)
+if "Investment Type" in df.columns:
+    all_invest_types = sorted(df["Investment Type"].dropna().unique())
+    selected_invest_types = st.sidebar.multiselect("Select Investment Types", options=all_invest_types, default=all_invest_types)
+else:
+    selected_invest_types = None
 
-# Filter data based on selections
+# -----------------------------
+# Apply Filters
+# -----------------------------
 filtered_df = df[
     (df["City Location"].isin(selected_cities)) &
     (df["Date"].dt.year.between(selected_years[0], selected_years[1])) &
-    (df["Industry Vertical"].isin(selected_industries)) &
-    (df["Amount in USD"].between(amount_range[0], amount_range[1]))
+    (df["Industry Vertical"].isin(selected_industries))
 ]
 
-# Filtered Data Preview
-st.subheader("📊 Filtered Data Preview")
+if selected_invest_types:
+    filtered_df = filtered_df[filtered_df["Investment Type"].isin(selected_invest_types)]
+
+# -----------------------------
+# Filtered Data Preview (Live)
+# -----------------------------
+st.subheader("📊 Filtered Data Preview (Live)")
 st.write(filtered_df.head())
 
-# Show Full Filtered Data
 if st.checkbox("Show Full Filtered Data"):
     st.dataframe(filtered_df)
 
-# Layout: 2x2 grid
+# -----------------------------
+# Dashboard Layout (2x2 Grid)
+# -----------------------------
 col1, col2 = st.columns(2)
 
 # 1️⃣ Top 10 Funded Startups
