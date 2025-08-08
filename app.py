@@ -116,3 +116,4 @@ with col6:
         st.pyplot(fig6)
     else:
         st.info("No data available for selected filters.")
+
