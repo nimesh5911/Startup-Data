@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # App configuration
-st.set_page_config(page_title="startup_cleaned.csv", layout="wide")
+st.set_page_config(page_title="cleaned_startup.csv", layout="wide")
 st.title("🚀 Startup Funding Analysis")
 
 # Load dataset
@@ -116,4 +116,5 @@ with col6:
         st.pyplot(fig6)
     else:
         st.info("No data available for selected filters.")
+
 
