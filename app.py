@@ -12,7 +12,7 @@ st.set_page_config(page_title="Startup Funding Dashboard", layout="wide")
 st.title("🚀 Startup Funding Analytics Dashboard")
 
 # Load Data
-df = pd.read_csv("startup_funding_cleaned.csv")
+df = pd.read_csv("startup_cleaned.csv")
 
 # Sidebar Filters
 st.sidebar.header("Filter Options")
@@ -91,3 +91,4 @@ ax3.set_xticklabels(
      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 )
 st.pyplot(fig3)
+
