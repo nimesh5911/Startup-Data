@@ -38,8 +38,12 @@ filtered_df = df[
 if selected_industry != "All":
     filtered_df = filtered_df[filtered_df["Industry Vertical"] == selected_industry]
 
-# Show Raw Data
-if st.checkbox("Show Raw Data"):
+# Filtered Data Preview
+st.subheader("📊 Filtered Data Preview")
+st.write(filtered_df.head())
+
+# Show Raw Data (Full Filtered Data)
+if st.checkbox("Show Full Filtered Data"):
     st.dataframe(filtered_df)
 
 # Layout: 2x2 grid
